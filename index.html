@@ -1,0 +1,185 @@
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplikasi Pesan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <!-- Home Button -->
+  <button
+    aria-label="Kembali ke menu utama"
+    class="home-btn hidden fixed top-4 left-4 z-50 p-2 rounded-md text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+    onclick="tampilkanMenu()"
+  >
+    <i class="fas fa-home fa-lg"></i>
+  </button>
+
+  <!-- Menu Awal -->
+  <section
+    class="menu max-w-md w-full bg-white rounded-xl shadow-md p-6 text-center"
+    role="region"
+    aria-label="Menu utama aplikasi pesan"
+  >
+    <h1 class="text-2xl font-semibold mb-6 text-gray-800">Menu</h1>
+    <button
+      type="button"
+      class="w-full py-3 mb-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-lg font-medium transition-colors"
+      onclick="tampilkanIsiPesan()"
+    >
+      Isi Pesan
+    </button>
+    <button
+      type="button"
+      class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-lg font-medium transition-colors"
+      onclick="tampilkanLihatPesan()"
+    >
+      Lihat Pesan
+    </button>
+  </section>
+
+  <!-- Isi Pesan -->
+  <section
+    class="isi-pesan hidden max-w-md w-full bg-white rounded-xl shadow-md p-6"
+    role="region"
+    aria-label="Formulir isi pesan"
+  >
+    <h1 class="text-2xl font-semibold mb-4 text-gray-800">Isi Pesan</h1>
+    <textarea
+      id="inputPesan"
+      placeholder="Tulis pesanmu..."
+      rows="5"
+      class="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+      aria-label="Tulis pesan"
+    ></textarea>
+    <button
+      type="button"
+      class="mt-4 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-lg font-medium transition-colors"
+      onclick="simpanPesan()"
+    >
+      Simpan
+    </button>
+  </section>
+
+  <!-- Lihat Pesan -->
+  <section
+    class="lihat-pesan hidden max-w-md w-full bg-white rounded-xl shadow-md p-6"
+    role="region"
+    aria-label="Daftar pesan yang tersimpan"
+  >
+    <h1 class="text-2xl font-semibold mb-4 text-gray-800">Daftar Pesan</h1>
+    <div id="daftarPesan" class="space-y-4 max-h-[400px] overflow-y-auto"></div>
+  </section>
+
+  <script>
+    /*
+      Pesan disimpan di localStorage browser pengguna.
+      Artinya, pesan hanya tersimpan dan terlihat di perangkat dan browser yang sama.
+      Pesan tidak dikirim ke server atau dibagikan ke pengguna lain.
+      Jadi, pesan tidak bisa dilihat oleh semua orang, hanya oleh pengguna yang sama di perangkat tersebut.
+    */
+
+    const menu = document.querySelector('.menu');
+    const isiPesan = document.querySelector('.isi-pesan');
+    const lihatPesan = document.querySelector('.lihat-pesan');
+    const homeBtn = document.querySelector('.home-btn');
+    const daftarPesan = document.getElementById('daftarPesan');
+
+    function tampilkanMenu() {
+      menu.classList.remove('hidden');
+      isiPesan.classList.add('hidden');
+      lihatPesan.classList.add('hidden');
+      homeBtn.classList.add('hidden');
+    }
+
+    function tampilkanIsiPesan() {
+      menu.classList.add('hidden');
+      isiPesan.classList.remove('hidden');
+      lihatPesan.classList.add('hidden');
+      homeBtn.classList.remove('hidden');
+      document.getElementById('inputPesan').focus();
+    }
+
+    function tampilkanLihatPesan() {
+      menu.classList.add('hidden');
+      isiPesan.classList.add('hidden');
+      lihatPesan.classList.remove('hidden');
+      homeBtn.classList.remove('hidden');
+      tampilkanPesan();
+    }
+
+    function simpanPesan() {
+      const pesanInput = document.getElementById('inputPesan');
+      const pesan = pesanInput.value.trim();
+      if (pesan) {
+        const pesanList = JSON.parse(localStorage.getItem('pesanList')) || [];
+        pesanList.push(pesan);
+        localStorage.setItem('pesanList', JSON.stringify(pesanList));
+        pesanInput.value = '';
+        alert('Pesan disimpan!');
+        tampilkanMenu();
+      } else {
+        alert('Mohon isi pesan terlebih dahulu.');
+        pesanInput.focus();
+      }
+    }
+
+    function tampilkanPesan() {
+      daftarPesan.innerHTML = '';
+      const pesanList = JSON.parse(localStorage.getItem('pesanList')) || [];
+      if (pesanList.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.textContent = 'Belum ada pesan yang disimpan.';
+        emptyMsg.className = 'text-gray-500 italic text-center';
+        daftarPesan.appendChild(emptyMsg);
+        return;
+      }
+      pesanList.forEach((pesan, index) => {
+        const div = document.createElement('div');
+        div.className =
+          'pesan-item relative border border-gray-300 rounded-md bg-gray-50 p-4 pr-10 text-gray-800 break-words';
+
+        const pesanText = document.createElement('p');
+        pesanText.textContent = pesan;
+        pesanText.className = 'whitespace-pre-wrap';
+        div.appendChild(pesanText);
+
+        const btn = document.createElement('button');
+        btn.setAttribute('aria-label', 'Hapus pesan');
+        btn.innerHTML = '<i class="fas fa-times"></i>';
+        btn.className =
+          'hapus absolute top-2 right-2 text-white bg-red-600 hover:bg-red-700 rounded-full w-7 h-7 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-500';
+        btn.onclick = () => hapusPesan(index);
+
+        div.appendChild(btn);
+        daftarPesan.appendChild(div);
+      });
+    }
+
+    function hapusPesan(index) {
+      const pesanList = JSON.parse(localStorage.getItem('pesanList')) || [];
+      pesanList.splice(index, 1);
+      localStorage.setItem('pesanList', JSON.stringify(pesanList));
+      tampilkanPesan();
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      tampilkanMenu();
+    });
+  </script>
+</body>
+</html>
